@@ -85,7 +85,6 @@ def initialize_rag():
 
     model = ChatOpenAI(
         model=model_name,
-        api_key=api_key
     )
 
     chain = prompt | model | StrOutputParser()
