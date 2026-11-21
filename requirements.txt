@@ -1,0 +1,11 @@
+langchain-core 
+langchain-docling 
+langchain-text-splitters 
+langchain-openai 
+python-dotenv
+torch 
+torchvision
+docling-parse
+streamlit
+
+
