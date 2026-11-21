@@ -21,7 +21,7 @@ st.set_page_config(
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
-model_name = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+model_name = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 if not api_key:
     st.error("OPENAI_API_KEY is missing from your .env file.")
