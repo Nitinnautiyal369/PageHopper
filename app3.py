@@ -2,6 +2,9 @@ import os
 import tempfile
 import streamlit as st
 from dotenv import load_dotenv
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
 from langchain_docling.loader import DoclingLoader, ExportType
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -20,11 +23,20 @@ st.set_page_config(
 )
 
 load_dotenv()
+
+# Sync Streamlit Cloud Secrets into os.environ if deployed
+try:
+    for key, value in st.secrets.items():
+        if isinstance(value, str) and key not in os.environ:
+            os.environ[key] = value
+except Exception:
+    pass
+
 api_key = os.getenv("OPENAI_API_KEY")
 model_name = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 if not api_key:
-    st.error("OPENAI_API_KEY is missing from your .env file.")
+    st.error("OPENAI_API_KEY is missing. Add it to your .env file locally or Streamlit Secrets in deployment.")
     st.stop()
 
 # --------------------------------------------------
@@ -37,10 +49,21 @@ def build_rag_from_pdf(file_bytes: bytes, file_name: str):
         tmp_path = tmp_file.name
 
     try:
+        # Configure Docling with OCR disabled to avoid read-only filesystem errors on Streamlit Cloud
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.do_ocr = False
+
+        converter = DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            }
+        )
+
         # Load PDF with Docling
         loader = DoclingLoader(
             file_path=tmp_path,
-            export_type=ExportType.MARKDOWN
+            export_type=ExportType.MARKDOWN,
+            converter=converter
         )
         documents = loader.load()
 
@@ -164,7 +187,7 @@ with st.sidebar:
 # --------------------------------------------------
 # 4. MAIN CHAT INTERFACE
 # --------------------------------------------------
-st.title("📑Page Hopper")
+st.title("📑 Page Hopper")
 
 if uploaded_file is None:
     st.info("👈 Upload a PDF file in the sidebar to start asking questions.")
@@ -238,12 +261,3 @@ if question := st.chat_input(f"Ask a question about {uploaded_file.name}..."):
                 if standalone_query != question:
                     st.caption(f"🔍 **Search query used:** *{standalone_query}*")
                 for idx, src in enumerate(sources_data, start=1):
-                    st.markdown(f"**Source {idx}** (Character offset: `{src['start_index']}`)")
-                    st.caption(src["snippet"])
-
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": answer,
-        "sources": sources_data,
-        "standalone_query": standalone_query if standalone_query != question else None
-    })
