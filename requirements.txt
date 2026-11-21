@@ -7,5 +7,9 @@ torch
 torchvision
 docling-parse
 streamlit
+docling
+docling-ibm-models
+opencv-python-headless
+
 
 
