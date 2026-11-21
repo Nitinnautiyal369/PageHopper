@@ -14,8 +14,8 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 # 1. PAGE CONFIG & ENVIRONMENT SETUP
 # --------------------------------------------------
 st.set_page_config(
-    page_title="Document RAG Assistant",
-    page_icon="📘",
+    page_title="Page Hopper",
+    page_icon="📑",
     layout="centered"
 )
 
@@ -164,7 +164,7 @@ with st.sidebar:
 # --------------------------------------------------
 # 4. MAIN CHAT INTERFACE
 # --------------------------------------------------
-st.title("🐇Page Hopper")
+st.title("📑Page Hopper")
 
 if uploaded_file is None:
     st.info("👈 Upload a PDF file in the sidebar to start asking questions.")
